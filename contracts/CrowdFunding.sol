@@ -17,11 +17,14 @@ contract CrowdFunding {
 
     uint numCampaigns;
     mapping (uint => Campaign) campaigns;
+    event CampaignCreated(address beneficiary, uint goal, uint campaignID);
+    event ContributionCreated(uint campaignID, address funder, uint amount);
 
     function newCampaign(address beneficiary, uint goal) returns (uint campaignID) {
         campaignID = numCampaigns++; // campaignID is return variable
         // Creates new struct and saves in storage. We leave out the mapping type.
         campaigns[campaignID] = Campaign(beneficiary, goal, 0, 0);
+        CampaignCreated(beneficiary, goal, campaignID);
     }
 
     function contribute(uint campaignID) payable {
@@ -31,6 +34,7 @@ contract CrowdFunding {
         // Note that you can also use Funder(msg.sender, msg.value) to initialise.
         c.funders[c.numFunders++] = Funder(msg.sender, msg.value);
         c.amount += msg.value;
+        ContributionCreated(campaignID, msg.sender, msg.value);
     }
 
     function checkGoalReached(uint campaignID) returns (bool reached) {
